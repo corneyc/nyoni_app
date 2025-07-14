@@ -1,21 +1,21 @@
 
 // App.js
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { onAuthStateChanged } from 'firebase/auth';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { auth } from './firebase';
 
 // Screens
+import BookingScreen from './screens/BookingScreen';
+import ProfileScreen from './screens/ProfileScreen';
 import SignInScreen from './screens/SignInScreen';
 import SignUpScreen from './screens/SignUpScreen';
-import WelcomeScreen from './screens/WelcomeScreen';
 import StyleAssistantScreen from './screens/StyleAssistantScreen';
-import ProfileScreen from './screens/ProfileScreen';
-import BookingScreen from './screens/BookingScreen';
+import WelcomeScreen from './screens/WelcomeScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,17 +23,19 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔐 Listen for auth state changes
   useEffect(() => {
+    // Listen for auth state change
     const unsubscribe = onAuthStateChanged(auth, (authUser) => {
       setUser(authUser);
       setLoading(false);
     });
+
+    // Cleanup subscription on unmount
     return unsubscribe;
   }, []);
 
-  // ⏳ Loading spinner while checking login
   if (loading) {
+    // Show splash or loading spinner while checking auth
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#5e239d" />
@@ -46,17 +48,19 @@ export default function App() {
       <SafeAreaProvider>
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {!user ? (
+            {user ? (
+              // User is signed in: show main app screens
               <>
-                <Stack.Screen name="SignIn" component={SignInScreen} />
-                <Stack.Screen name="SignUp" component={SignUpScreen} />
-              </>
-            ) : (
-              <>
-                <Stack.Screen name="Welcome" component={WelcomeScreen} />
                 <Stack.Screen name="StyleAssistant" component={StyleAssistantScreen} />
                 <Stack.Screen name="Booking" component={BookingScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
+              </>
+            ) : (
+              // No user: show auth flow
+              <>
+                <Stack.Screen name="Welcome" component={WelcomeScreen} />
+                <Stack.Screen name="SignIn" component={SignInScreen} />
+                <Stack.Screen name="SignUp" component={SignUpScreen} />
               </>
             )}
           </Stack.Navigator>
@@ -67,9 +71,5 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });

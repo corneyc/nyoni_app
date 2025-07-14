@@ -1,5 +1,6 @@
 
 // screens/WelcomeScreen.js
+// screens/WelcomeScreen.js
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -12,15 +13,27 @@ export default function WelcomeScreen() {
       <Image
         source={require('../assets/images/nyoni-logo.png')}
         style={styles.logo}
+        accessibilityLabel="Nyoni logo"
       />
       <Text style={styles.brandTitle}>Nyoni</Text>
       <Text style={styles.tagline}>Your Crown. Your Freedom.</Text>
 
       <TouchableOpacity
-        style={styles.getStartedButton}
+        style={[styles.button, styles.signInButton]}
         onPress={() => navigation.navigate('SignIn')}
+        accessibilityRole="button"
+        accessibilityLabel="Sign In"
       >
-        <Text style={styles.getStartedText}>GET STARTED</Text>
+        <Text style={styles.buttonText}>Sign In</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, styles.signUpButton]}
+        onPress={() => navigation.navigate('SignUp')}
+        accessibilityRole="button"
+        accessibilityLabel="Sign Up"
+      >
+        <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
     </View>
   );
@@ -30,13 +43,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5e1ff',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 120,
+    height: 120,
     resizeMode: 'contain',
     marginBottom: 12,
   },
@@ -44,23 +57,30 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 'bold',
     color: '#5e239d',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   tagline: {
     fontSize: 20,
     color: '#7a44c2',
-    marginBottom: 35,
+    marginBottom: 40,
     textAlign: 'center',
   },
-  getStartedButton: {
-    backgroundColor: '#5e239d',
+  button: {
+    width: '80%',
     paddingVertical: 15,
-    paddingHorizontal: 40,
     borderRadius: 30,
+    marginBottom: 15,
+    alignItems: 'center',
   },
-  getStartedText: {
+  signInButton: {
+    backgroundColor: '#5e239d',
+  },
+  signUpButton: {
+    backgroundColor: '#7a44c2',
+  },
+  buttonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '600',
   },
 });

@@ -45,14 +45,7 @@ export default function StyleAssistantScreen() {
     fetchUserProfile();
   }, []);
 
-  // Fetch AI style recommendations when selfie changes
-  useEffect(() => {
-    if (image) {
-      fetchAIRecommendations(image);
-    }
-  }, [image]);
-
-  // Take selfie with camera
+  // Take selfie
   const pickImage = async () => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -68,8 +61,8 @@ export default function StyleAssistantScreen() {
       });
       if (!result.canceled && result.assets?.length > 0) {
         setImage(result.assets[0].uri);
-        setSelectedStyle(null);
-        setStylesList([]);
+        setSelectedStyle(null); // reset chosen style on new selfie
+        setStylesList([]);       // clear previous AI styles
       }
     } catch (error) {
       Alert.alert('Error', 'Could not access camera.');
@@ -81,6 +74,7 @@ export default function StyleAssistantScreen() {
     const response = await fetch(uri);
     const blob = await response.blob();
     const filename = `selfies/${auth.currentUser?.uid}_${Date.now()}.jpg`;
+
     const storageRef = ref(getStorage(), filename);
     await uploadBytes(storageRef, blob);
     return await getDownloadURL(storageRef);
@@ -97,7 +91,10 @@ export default function StyleAssistantScreen() {
       const downloadUrl = await uploadImageToStorage(image);
       await setDoc(
         doc(db, 'users', auth.currentUser.uid),
-        { selfieUrl: downloadUrl, updatedAt: new Date() },
+        {
+          selfieUrl: downloadUrl,
+          updatedAt: new Date(),
+        },
         { merge: true }
       );
       Alert.alert('Success', 'Selfie uploaded and saved.');
@@ -109,11 +106,11 @@ export default function StyleAssistantScreen() {
     }
   };
 
-  // Fetch AI style recommendations from your API
+  // Fetch AI style recommendations based on selfie URI
   const fetchAIRecommendations = async (selfieUri) => {
     try {
       setLoadingAI(true);
-      const response = await fetch('http://your-api-url/predict', { // Replace with your API URL
+      const response = await fetch('http://localhost:3000/predict', { // Change to your API URL
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageUri: selfieUri }),
@@ -134,14 +131,24 @@ export default function StyleAssistantScreen() {
     }
   };
 
-  // Save chosen style to Firestore and update UI
+  // Call AI API when selfie changes
+  useEffect(() => {
+    if (image) {
+      fetchAIRecommendations(image);
+    }
+  }, [image]);
+
+  // Save selected style to Firestore user profile
   const chooseStyle = async (style) => {
     try {
       const userId = auth.currentUser?.uid;
       if (!userId) throw new Error('User not authenticated');
       await setDoc(
         doc(db, 'users', userId),
-        { selectedStyle: style, styleChosenAt: new Date() },
+        {
+          selectedStyle: style,
+          styleChosenAt: new Date(),
+        },
         { merge: true }
       );
       setSelectedStyle(style);
@@ -154,9 +161,12 @@ export default function StyleAssistantScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.header}>
-        <Ionicons name="arrow-back" size={28} color="#5e239d" />
-      </TouchableOpacity>
+      {/* Back Button - only show if can go back */}
+      {navigation.canGoBack() && (
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.header}>
+          <Ionicons name="arrow-back" size={28} color="#5e239d" />
+        </TouchableOpacity>
+      )}
 
       <Text style={styles.title}>Upload Selfie</Text>
 

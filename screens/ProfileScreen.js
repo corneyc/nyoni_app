@@ -1,38 +1,104 @@
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { auth, db } from '../firebase'; // ✅ make sure this is correct
 
-// screens/ProfileScreen.js
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { auth } from '../firebase';
-import { useNavigation } from '@react-navigation/native';
+const ProfileScreen = () => {
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export default function ProfileScreen() {
-  const navigation = useNavigation();
-
-  const handleSignOut = async () => {
+  const fetchBookings = async () => {
     try {
-      await auth.signOut();
-      // After sign out, navigation stack resets via onAuthStateChanged in App.js
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const bookingsRef = collection(db, 'bookings');
+      const q = query(bookingsRef, where('userId', '==', user.uid));
+      const snapshot = await getDocs(q);
+
+      const userBookings = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setBookings(userBookings);
     } catch (error) {
-      Alert.alert('Error', 'Failed to sign out. Please try again.');
+      console.error('Error fetching bookings:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Your Profile</Text>
+  useEffect(() => {
+    fetchBookings();
+  }, []);
 
-      {/* Profile content like selfie, style, bookings */}
-
-      <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-        <Text style={styles.signOutText}>Sign Out</Text>
-      </TouchableOpacity>
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <Text style={styles.title}>{item.selectedStyle || 'No style selected'}</Text>
+      <Text>{item.date || 'No date provided'}</Text>
+      <Text>{item.location || 'No location provided'}</Text>
     </View>
   );
-}
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#000" />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>My Bookings</Text>
+      {bookings.length === 0 ? (
+        <Text style={styles.empty}>No bookings found.</Text>
+      ) : (
+        <FlatList
+          data={bookings}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+        />
+      )}
+    </View>
+  );
+};
+
+export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff7ff', alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 30, color: '#5e239d' },
-  signOutButton: { marginTop: 40, backgroundColor: '#5e239d', padding: 15, borderRadius: 30 },
-  signOutText: { color: '#fff', fontSize: 16 },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#FFF',
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  card: {
+    backgroundColor: '#f9f9f9',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  title: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  empty: {
+    fontStyle: 'italic',
+    color: '#888',
+  },
 });

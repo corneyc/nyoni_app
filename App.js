@@ -1,75 +1,57 @@
-
 // App.js
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { auth } from './firebase';
+import { enableScreens } from 'react-native-screens';
 
-// Screens
-import BookingScreen from './screens/BookingScreen';
-import ProfileScreen from './screens/ProfileScreen';
 import SignInScreen from './screens/SignInScreen';
 import SignUpScreen from './screens/SignUpScreen';
+import SplashScreen from './screens/SplashScreen';
 import StyleAssistantScreen from './screens/StyleAssistantScreen';
 import WelcomeScreen from './screens/WelcomeScreen';
+
+import BookingConfirmation from './screens/BookingScreen';
+import StyleTryOn from './screens/StyleTryOn';
+
+enableScreens();
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Listen for auth state change
-    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-      setUser(authUser);
-      setLoading(false);
-    });
-
-    // Cleanup subscription on unmount
-    return unsubscribe;
+    const timer = setTimeout(() => setIsLoading(false), 2500);
+    return () => clearTimeout(timer);
   }, []);
 
-  if (loading) {
-    // Show splash or loading spinner while checking auth
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#5e239d" />
-      </View>
-    );
-  }
-
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {user ? (
-              // User is signed in: show main app screens
-              <>
-                <Stack.Screen name="StyleAssistant" component={StyleAssistantScreen} />
-                <Stack.Screen name="Booking" component={BookingScreen} />
-                <Stack.Screen name="Profile" component={ProfileScreen} />
-              </>
-            ) : (
-              // No user: show auth flow
-              <>
-                <Stack.Screen name="Welcome" component={WelcomeScreen} />
-                <Stack.Screen name="SignIn" component={SignInScreen} />
-                <Stack.Screen name="SignUp" component={SignUpScreen} />
-              </>
-            )}
-          </Stack.Navigator>
-        </NavigationContainer>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Splash">
+          {isLoading ? (
+            <Stack.Screen
+              name="Splash"
+              component={SplashScreen}
+              options={{ headerShown: false }}
+            />
+          ) : (
+            <>
+              <Stack.Screen
+                name="Welcome"
+                component={WelcomeScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen name="SignIn" component={SignInScreen} />
+              <Stack.Screen name="SignUp" component={SignUpScreen} />
+              <Stack.Screen name="StyleAssistant" component={StyleAssistantScreen} />
+              <Stack.Screen name="StyleTryOn" component={StyleTryOn} options={{ title: 'Try Hairstyles' }} />
+              <Stack.Screen name="BookingConfirmation" component={BookingConfirmation} options={{ title: 'Booking Confirmed' }} />
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-});

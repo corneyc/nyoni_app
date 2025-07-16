@@ -1,86 +1,75 @@
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-// screens/WelcomeScreen.js
-// screens/WelcomeScreen.js
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-
-export default function WelcomeScreen() {
-  const navigation = useNavigation();
-
+const WelcomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../assets/images/nyoni-logo.png')}
-        style={styles.logo}
-        accessibilityLabel="Nyoni logo"
-      />
-      <Text style={styles.brandTitle}>Nyoni</Text>
-      <Text style={styles.tagline}>Your Crown. Your Freedom.</Text>
+      <Text style={styles.title}>Welcome to Nyoni</Text>
+      <Text style={styles.subtitle}>Where AI Meets Artistry in Hair Braiding</Text>
 
       <TouchableOpacity
-        style={[styles.button, styles.signInButton]}
+        style={styles.outlinedButton}
         onPress={() => navigation.navigate('SignIn')}
-        accessibilityRole="button"
-        accessibilityLabel="Sign In"
       >
-        <Text style={styles.buttonText}>Sign In</Text>
+        <Text style={styles.outlinedText}>SIGN IN</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.button, styles.signUpButton]}
+        style={styles.outlinedButton}
         onPress={() => navigation.navigate('SignUp')}
-        accessibilityRole="button"
-        accessibilityLabel="Sign Up"
       >
-        <Text style={styles.buttonText}>Sign Up</Text>
+        <Text style={styles.outlinedText}>SIGN UP</Text>
       </TouchableOpacity>
     </View>
   );
-}
+};
+
+export default WelcomeScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5e1ff',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
   },
-  logo: {
-    width: 120,
-    height: 120,
-    resizeMode: 'contain',
-    marginBottom: 12,
-  },
-  brandTitle: {
-    fontSize: 48,
+  title: {
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#5e239d',
+    color: '#222',
     marginBottom: 10,
-  },
-  tagline: {
-    fontSize: 20,
-    color: '#7a44c2',
-    marginBottom: 40,
     textAlign: 'center',
   },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 40,
+    paddingHorizontal: 20,
+  },
   button: {
-    width: '80%',
-    paddingVertical: 15,
+    backgroundColor: '#000',
+    paddingVertical: 14,
+    paddingHorizontal: 30,
     borderRadius: 30,
-    marginBottom: 15,
-    alignItems: 'center',
-  },
-  signInButton: {
-    backgroundColor: '#5e239d',
-  },
-  signUpButton: {
-    backgroundColor: '#7a44c2',
+    marginBottom: 20,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
+  },
+  outlinedButton: {
+    borderColor: '#000',
+    borderWidth: 1,
+    borderRadius: 30,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    marginBottom: 12,
+  },
+  outlinedText: {
+    color: '#000',
+    fontSize: 15,
+    fontWeight: '500',
   },
 });

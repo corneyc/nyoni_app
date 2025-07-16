@@ -1,36 +1,22 @@
 // screens/SplashScreen.js
-import React, { useEffect, useRef } from 'react';
-import { View, Animated, StyleSheet, Image, Text } from 'react-native';
-import { useReducedMotion } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
 
-export default function SplashScreen() {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const reduceMotion = useReducedMotion();
-
+export default function SplashScreen({ navigation }) {
   useEffect(() => {
-    if (!reduceMotion) {
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 1200,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      opacity.setValue(1);
-    }
-  }, [reduceMotion]);
+    const timer = setTimeout(() => {
+      navigation.replace('Welcome'); // Replace Splash with Welcome so user can't go back
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
-      <Animated.Image
-        source={require('../assets/images/nyoni-logo.png')}
-        style={[styles.logo, { opacity }]}
-        resizeMode="contain"
-        accessibilityLabel="Nyoni logo"
+      <Image
+        source={require('../assets/images/nyoni-logo.png')} // Put your logo in assets folder
+        style={styles.logo}
       />
-      <Animated.View style={{ opacity, alignItems: 'center' }}>
-        <Text style={styles.title}>Nyoni</Text>
-        <Text style={styles.subtitle}>Your Crown. Your Freedom.</Text>
-      </Animated.View>
     </View>
   );
 }
@@ -38,24 +24,13 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5e1ff',
+    backgroundColor: '#fff', // Or your brand background color
     justifyContent: 'center',
     alignItems: 'center',
   },
   logo: {
-    width: 150,
-    height: 150,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#5e239d',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#7a44c2',
-    marginTop: 4,
-    textAlign: 'center',
+    width: 250,
+    height: 250,
+    resizeMode: 'contain',
   },
 });
